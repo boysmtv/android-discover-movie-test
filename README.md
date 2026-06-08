@@ -1,22 +1,48 @@
-# Discover of Movie
-## Find your latest film and display the trailer immediately, save your film in the application and open it as soon as possible.
+# Mandiri Test Movie
 
-### Are you a fan and seeker of the latest films, has your film been shown in cinemas, do you want to see a snippet of the show? Satisfy yourself showing snippets of films around the world in an application
+Android multi-module movie discovery app. Browse popular, top-rated, upcoming, and now-playing movies. Watch trailers, search films, save favourites, and manage your profile — all with background services for heartbeat, location, and profile sync.
 
 ## Technologies
 
-- [Kotlin](https://kotlinlang.org/) - %100 Kotlin
-- [Firestore](https://firebase.google.com/docs/firestore) for Databases
-- [Material 3](https://m3.material.io/develop/android/mdc-android) for UI design
-- [Coil](https://github.com/coil-kt/coil) for image loading
-- [Coroutines](https://github.com/Kotlin/kotlinx.coroutines) for asynchronous operations
-- [StateFlow](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-state-flow/)
-- [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel)
-- [Dagger Hilt](https://developer.android.com/training/dependency-injection/hilt-android) for Dependency Injection
-- [OkHttp](https://github.com/square/okhttp) and [Ktor](https://github.com/ktorio/ktor) for network operations
-- [Moshi](https://github.com/square/moshi) for JSON library
-- [Timber](https://github.com/JakeWharton/timber) for Logging
-- [TheMovieDb(Tmdb) Api](https://developers.themoviedb.org/3) for movies
+- [Kotlin](https://kotlinlang.org/) — 100% Kotlin
+- [Ktor](https://ktor.io/) — HTTP client for TMDB API
+- [Firebase Realtime Database](https://firebase.google.com/docs/database) + [Firestore](https://firebase.google.com/docs/firestore) — Real-time data & user storage
+- [Firebase Auth](https://firebase.google.com/docs/auth) & [Google Sign-In](https://developers.google.com/identity/sign-in/android) — Authentication
+- [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging) — Push notifications
+- [Room](https://developer.android.com/training/data-storage/room) — Local database (favourites, heartbeat, users)
+- [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) + SharedPreferences — Local preferences
+- [Material Design 3](https://m3.material.io/) — UI components
+- [Glide](https://github.com/bumptech/glide) — Image loading with blur transformations
+- [BannerView](https://github.com/zhpanvip/BannerViewPager) — Movie banner carousel
+- [Coroutines & Flow](https://kotlinlang.org/docs/coroutines-overview.html) — Async operations
+- [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) — State management
+- [Dagger Hilt](https://developer.android.com/training/dependency-injection/hilt-android) — Dependency injection
+- [Moshi](https://github.com/square/moshi) — JSON serialization
+- [Paging 3](https://developer.android.com/topic/libraries/architecture/paging/v3-overview) — Paginated movie lists
+- [Navigation Component](https://developer.android.com/guide/navigation) — Multi-graph navigation
+- [The Movie Database (TMDB) API](https://developers.themoviedb.org/3) — Movie data source
+
+## Architecture
+
+Multi-module project with clean architecture layers:
+
+```
+:app                              → Application entry point
+:core:common                      → Base classes, preferences, utilities
+:core:data                        → Repository layer
+:core:domain                      → Use case layer
+:core:model                       → Data models (remote & local entities)
+:core:nav                         → Navigation graphs & navigators
+:core:network                     → Ktor client, Firebase/Firestore sources
+:core:ui                          → Shared UI components, dialogs, themes
+:core:utilities                   → Extension functions, constants, listeners
+:feature:auth                     → Login, register, Google Sign-In
+:feature:common                   → Shared feature utilities
+:feature:menu                     → Bottom nav menu, settings
+:feature:movie                    → Home, search, detail, favourites, credits
+:feature:services                 → Foreground services (heartbeat, location, profile)
+:feature:splash                   → Splash screen
+```
 
 <img src="https://github.com/boysmtv/boys-learn-fe-android-ktor-movie/assets/30995595/2b6bbb0e-f49a-45ab-8673-208e50f2802a" width="300" height="650" />
 <img src="https://github.com/boysmtv/boys-learn-fe-android-ktor-movie/assets/30995595/61a80e56-2ed4-440b-9288-79a1244ceeee" width="300" height="650" />
