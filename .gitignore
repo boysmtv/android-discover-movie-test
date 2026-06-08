@@ -122,6 +122,9 @@ mapping.txt
 .DS_Store
 .cxx
 
+# Backup files
+*.bkp
+
 .idea/compiler.xml
 
 
