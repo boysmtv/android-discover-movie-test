@@ -1,0 +1,81 @@
+/*
+ * Project: Mandiri Test Movie
+ * Author: Boys.mtv@gmail.com
+ * File: RecentAdapter.kt
+ *
+ * Last modified by Dedy Wijaya on 26/06/08 18.45
+ */
+
+package com.mandiri.movie.feature.movie.adapter
+
+import android.annotation.SuppressLint
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import coil.load
+import com.mandiri.movie.core.common.util.listener.OnClickRecent
+import com.mandiri.movie.core.model.RecentDataModel
+import com.mandiri.movie.core.utilities.Constant
+import com.mandiri.movie.core.utilities.Constant.FIVE_FLOAT
+import com.mandiri.movie.core.utilities.Constant.THIRTY_FLOAT
+import com.mandiri.movie.feature.movie.R
+import com.mandiri.movie.feature.movie.databinding.MovieSearchItemBinding
+
+class RecentAdapter(private val clickMovie: OnClickRecent) :
+
+    RecyclerView.Adapter<RecentAdapter.ViewHolder>() {
+
+    private var listFavourite = mutableListOf<RecentDataModel>()
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(listFavourite[position])
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(
+            MovieSearchItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            ), clickMovie
+        )
+    }
+
+    override fun getItemCount(): Int {
+        return listFavourite.size
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun submitData(favourite: MutableList<RecentDataModel>) {
+        listFavourite = favourite
+        notifyDataSetChanged()
+    }
+
+    inner class ViewHolder(
+        private var binding: MovieSearchItemBinding,
+        private val onClickMovie: OnClickRecent
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(item: RecentDataModel) {
+            binding.apply {
+                tvTitle.text = item.originalTitle
+
+                thumbnail.load("${Constant.BASE_URL_IMAGE_200}${item.posterPath}") {
+                    val context = root.context
+                    val circularProgressDrawable = CircularProgressDrawable(context).apply {
+                        strokeWidth = FIVE_FLOAT
+                        centerRadius = THIRTY_FLOAT
+                        strokeCap = android.graphics.Paint.Cap.BUTT
+                        start()
+                    }
+                    placeholder(circularProgressDrawable)
+                    error(R.drawable.ic_baseline_broken_image_24)
+                }
+                root.setOnClickListener {
+                    onClickMovie(item)
+                }
+
+            }
+        }
+    }
+
+}

@@ -1,0 +1,145 @@
+/*
+ * Project: Mandiri Test Movie
+ * Author: Boys.mtv@gmail.com
+ * File: CreditsAdapter.kt
+ *
+ * Last modified by Dedy Wijaya on 26/06/08 18.45
+ */
+
+package com.mandiri.movie.feature.movie.adapter
+
+import android.graphics.Paint
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import coil.load
+import com.mandiri.movie.core.common.util.listener.OnClickCreditsCast
+import com.mandiri.movie.core.common.util.listener.OnClickCreditsCrew
+import com.mandiri.movie.core.model.CastModel
+import com.mandiri.movie.core.model.CrewModel
+import com.mandiri.movie.core.utilities.Constant
+import com.mandiri.movie.core.utilities.Constant.FIVE_FLOAT
+import com.mandiri.movie.core.utilities.Constant.THIRTY_FLOAT
+import com.mandiri.movie.feature.movie.R
+import com.mandiri.movie.feature.movie.databinding.MovieCreditsItemBinding
+
+sealed class CreditsAdapter {
+
+    class Cast(private val onClickCreditsCast: OnClickCreditsCast) :
+
+        ListAdapter<CastModel, Cast.ViewHolder>(CastCallback()) {
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = getItem(position)
+            item?.let { holder.bind(it) }
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            return ViewHolder(
+                MovieCreditsItemBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
+                ), onClickCreditsCast
+            )
+        }
+
+        inner class ViewHolder(
+            private val binding: MovieCreditsItemBinding,
+            private val onClickCreditsCast: OnClickCreditsCast
+        ) : RecyclerView.ViewHolder(binding.root) {
+
+            fun bind(item: CastModel) {
+                binding.apply {
+                    tvName.text = item.name
+
+                    ivThumbnail.load("${Constant.BASE_URL_IMAGE_500}${item.profilePath}")
+                    {
+                        val context = root.context
+                        val circularProgressDrawable = CircularProgressDrawable(context).apply {
+                            strokeWidth = FIVE_FLOAT
+                            centerRadius = THIRTY_FLOAT
+                            strokeCap = Paint.Cap.BUTT
+                            start()
+                        }
+                        placeholder(circularProgressDrawable)
+                        error(R.drawable.ic_baseline_broken_image_24)
+                    }
+
+                    root.setOnClickListener {
+                        onClickCreditsCast(item)
+                    }
+
+                }
+            }
+        }
+
+        class CastCallback : DiffUtil.ItemCallback<CastModel>() {
+            override fun areItemsTheSame(oldItem: CastModel, newItem: CastModel): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(oldItem: CastModel, newItem: CastModel): Boolean {
+                return oldItem == newItem
+            }
+        }
+    }
+
+    class Crew(private val onClickCreditsCrew: OnClickCreditsCrew) :
+
+        ListAdapter<CrewModel, Crew.ViewHolder>(CrewCallback()) {
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = getItem(position)
+            item?.let { holder.bind(it) }
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            return ViewHolder(
+                MovieCreditsItemBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
+                ), onClickCreditsCrew
+            )
+        }
+
+        inner class ViewHolder(
+            private val binding: MovieCreditsItemBinding,
+            private val onClickCreditsCrew: OnClickCreditsCrew
+        ) : RecyclerView.ViewHolder(binding.root) {
+
+            fun bind(item: CrewModel) {
+                binding.apply {
+                    tvName.text = item.name
+
+                    ivThumbnail.load("${Constant.BASE_URL_IMAGE_500}${item.profilePath}") {
+                        val context = root.context
+                        val circularProgressDrawable = CircularProgressDrawable(context).apply {
+                            strokeWidth = FIVE_FLOAT
+                            centerRadius = THIRTY_FLOAT
+                            strokeCap = Paint.Cap.BUTT
+                            start()
+                        }
+                        placeholder(circularProgressDrawable)
+                        error(R.drawable.ic_baseline_broken_image_24)
+                    }
+
+                    root.setOnClickListener {
+                        onClickCreditsCrew(item)
+                    }
+                }
+            }
+        }
+
+        class CrewCallback : DiffUtil.ItemCallback<CrewModel>() {
+            override fun areItemsTheSame(oldItem: CrewModel, newItem: CrewModel): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(oldItem: CrewModel, newItem: CrewModel): Boolean {
+                return oldItem == newItem
+            }
+        }
+    }
+
+}

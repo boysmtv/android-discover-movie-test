@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "799103436802",
+    "firebase_url": "https://mandiri-test-app-default-rtdb.firebaseio.com",
+    "project_id": "mandiri-test-app",
+    "storage_bucket": "mandiri-test-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799103436802:android:ff1a06bfd984f0664bbf1b",
+        "android_client_info": {
+          "package_name": "com.mandiri.movie"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCuY6JeHedNtlDa_3VL6rjWFWNjnLCUFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,54 @@
+package com.mandiri.movie.core.network.di
+
+import android.content.Context
+import com.chuckerteam.chucker.api.ChuckerCollector
+import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.mandiri.movie.core.network.KtorClient
+import com.mandiri.movie.core.network.firebase.FirebaseClient
+import com.mandiri.movie.core.network.firestore.FirestoreClient
+import com.mandiri.movie.core.utilities.Constant.MAX_CONTENT_LENGTH_INTERCEPTION
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+class KtorModule {
+
+    @Provides
+    @Singleton
+    fun provideChuckerInterceptor(
+        @ApplicationContext context: Context,
+    ): ChuckerInterceptor = ChuckerInterceptor.Builder(context)
+        .collector(ChuckerCollector(context))
+        .maxContentLength(MAX_CONTENT_LENGTH_INTERCEPTION)
+        .redactHeaders(emptySet())
+        .alwaysReadResponseBody(false)
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideKtorClient(
+        chuckerInterceptor: ChuckerInterceptor,
+    ): KtorClient {
+        return KtorClient(chuckerInterceptor)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseClient(
+    ): FirebaseClient {
+        return FirebaseClient()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirestoreClient(
+    ): FirestoreClient {
+        return FirestoreClient()
+    }
+
+}

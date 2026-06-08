@@ -1,0 +1,110 @@
+/*
+ * Project: Mandiri Test Movie
+ * Author: Boys.mtv@gmail.com
+ * File: GoogleSignInExt.kt
+ *
+ * Last modified by Dedy Wijaya on 26/06/08 18.45
+ */
+
+package com.mandiri.movie.core.common.google
+
+import android.content.Context
+import android.util.Log
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.mandiri.movie.core.common.R
+import com.mandiri.movie.core.model.UserModel
+import com.mandiri.movie.core.utilities.Constant
+import com.mandiri.movie.core.utilities.Constant.GOOGLE_STATUS_CODE_12501
+
+class GoogleSignInExt(
+    private val callbackGoogleSignInSuccess: (UserModel) -> Unit,
+    private val callbackGoogleSignInError: (String) -> Unit,
+) {
+    private lateinit var context: Context
+
+    lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var firebaseAuth: FirebaseAuth
+
+    fun initGoogle(context: Context) {
+        this.context = context
+        FirebaseApp.initializeApp(context)
+
+        googleSignInClient = GoogleSignIn.getClient(
+            context, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(context.getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+        )
+        firebaseAuth = FirebaseAuth.getInstance()
+    }
+
+    fun handleResult(completedTask: Task<GoogleSignInAccount>) {
+        try {
+            val account: GoogleSignInAccount? = completedTask.getResult(ApiException::class.java)
+            if (account != null) handleDataAuth(account)
+        } catch (e: ApiException) {
+            Log.e("", "Error Auth-message: ${e.message}")
+
+            if (e.statusCode != GOOGLE_STATUS_CODE_12501){
+                callbackGoogleSignInError.invoke("Please try again!")
+            }
+        }
+    }
+
+    private fun handleDataAuth(account: GoogleSignInAccount) =
+        firebaseAuth.signInWithCredential(
+            GoogleAuthProvider.getCredential(
+                account.idToken, null
+            )
+        ).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val accountModel = UserModel(
+                    idGoogle = account.id.toString(),
+                    idToken = account.idToken.toString(),
+                    email = account.email.toString(),
+                    firstName = account.givenName.toString(),
+                    lastName = account.familyName.toString(),
+                    displayName = account.displayName.toString(),
+                    photoUrl = account.photoUrl.toString(),
+                )
+                callbackGoogleSignInSuccess.invoke(accountModel)
+            } else {
+                callbackGoogleSignInError.invoke(
+                    task.exception?.message ?: "Please check your connection"
+                )
+            }
+        }
+
+    private fun getGoogleSingInClient() = GoogleSignIn.getClient(
+        context, GoogleSignInOptions
+            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestProfile()
+            .build()
+    )
+
+    private fun isUserSignedIn() = GoogleSignIn.getLastSignedInAccount(context) != null
+
+    fun signOut(
+        isSuccess: () -> Unit,
+        isError: (String?) -> Unit,
+    ) {
+        if (isUserSignedIn()) {
+            getGoogleSingInClient().signOut().addOnCompleteListener {
+                if (it.isSuccessful) {
+                    isSuccess.invoke()
+                } else {
+                    isError.invoke(it.exception?.message)
+                }
+            }
+        } else isError.invoke(null)
+    }
+}

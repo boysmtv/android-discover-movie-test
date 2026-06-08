@@ -1,0 +1,38 @@
+/*
+ * Project: Mandiri Test Movie
+ * Author: Boys.mtv@gmail.com
+ * File: DataStoreCacheEvent.kt
+ *
+ * Last modified by Dedy Wijaya on 26/06/08 18.45
+ */
+
+package com.mandiri.movie.core.common.util.event
+
+sealed interface DataStoreCacheEvent<out T> {
+
+    object StoreSuccess : DataStoreCacheEvent<Nothing>
+    object FetchError : DataStoreCacheEvent<Nothing>
+    class FetchSuccess<T>(val auth: T) : DataStoreCacheEvent<T>
+
+}
+
+fun <T> invokeDataStoreEvent(
+    event: DataStoreCacheEvent<T>,
+    isFetched: ((T) -> Unit)? = null,
+    isError: (() -> Unit)? = null,
+    isStored: (() -> Unit)? = null,
+) {
+    when (event) {
+        is DataStoreCacheEvent.StoreSuccess -> {
+            isStored?.invoke()
+        }
+
+        is DataStoreCacheEvent.FetchSuccess -> {
+            isFetched?.invoke(event.auth)
+        }
+
+        is DataStoreCacheEvent.FetchError -> {
+            isError?.invoke()
+        }
+    }
+}

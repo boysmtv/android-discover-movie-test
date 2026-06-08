@@ -1,0 +1,19 @@
+/*
+ * Project: Mandiri Test Movie
+ * Author: Boys.mtv@gmail.com
+ * File: LoginModel.kt
+ *
+ * Last modified by Dedy Wijaya on 26/06/08 18.45
+ */
+
+package com.mandiri.movie.core.model
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class LoginModel(
+    val id: String? = null,
+    val fullName: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
+)

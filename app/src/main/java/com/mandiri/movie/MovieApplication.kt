@@ -1,0 +1,23 @@
+/*
+ * Project: Mandiri Test Movie
+ * Author: Boys.mtv@gmail.com
+ * File: MovieApplication.kt
+ *
+ * Last modified by Dedy Wijaya on 26/06/08 18.45
+ */
+
+package com.mandiri.movie
+
+import android.app.Application
+import com.jakewharton.threetenabp.AndroidThreeTen
+import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
+
+@HiltAndroidApp
+class MovieApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Timber.plant(Timber.DebugTree())
+        AndroidThreeTen.init(this)
+    }
+}

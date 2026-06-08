@@ -1,0 +1,191 @@
+/*
+ * Project: Mandiri Test Movie
+ * Author: Boys.mtv@gmail.com
+ * File: LocationService.kt
+ *
+ * Last modified by Dedy Wijaya on 26/06/08 18.45
+ */
+
+package com.mandiri.movie.feature.services.location
+
+import android.Manifest
+import android.app.Service
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import androidx.core.app.ActivityCompat
+import com.mandiri.movie.core.common.util.JsonUtil
+import com.mandiri.movie.core.common.util.LocationUtil
+import com.mandiri.movie.core.common.data.preferences.DataStorePreferences
+import com.mandiri.movie.core.model.LocationModel
+import com.mandiri.movie.core.utilities.Constant.ONE_HUNDRED_LONG
+import com.mandiri.movie.core.utilities.Constant.THREAD_SLEEP_TIMER_58_SECOND
+import com.mandiri.movie.core.utilities.Constant.ZERO_FLOAT
+import com.mandiri.movie.core.utilities.Constant.ZERO_LONG
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class LocationService : Service(), LocationListener {
+
+    private val tag = this::class.java.simpleName
+
+    private var threadLocation: ThreadLocation = ThreadLocation()
+
+    @Inject
+    lateinit var jsonUtil: JsonUtil
+
+    @Inject
+    lateinit var preferences: DataStorePreferences
+
+    private lateinit var locationUtil: LocationUtil
+    private var location: Location? = null
+
+    private var locationModel = LocationModel()
+
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
+
+    private val threadSleepTimer = THREAD_SLEEP_TIMER_58_SECOND
+
+    override fun onCreate() {
+        super.onCreate()
+
+        locationUtil = LocationUtil(context = this)
+        threadLocation.initComponent(context = this, jsonUtil = jsonUtil, preferences = preferences)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Thread {
+            while (true) {
+                try {
+                    getLocation()
+                    Thread.sleep(threadSleepTimer)
+                    setupCheckLocation()
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
+            }
+        }.start()
+
+        return START_NOT_STICKY
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onLocationChanged(location: Location) {
+        locationModel.apply {
+            latitude = location.latitude
+            longitude = location.longitude
+        }
+        coroutineScope.launch {
+            threadLocation.storeLocation(locationModel)
+        }
+    }
+
+    private fun getLocation() {
+        val locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+        val isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val isNetworkEnable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+        if (!isGPSEnable && !isNetworkEnable) {
+            stopSelf()
+        } else {
+            if (isNetworkEnable) {
+                getLocationFromNetwork(locationManager)
+            }
+            if (isGPSEnable) {
+                getLocationFromGps(locationManager)
+            }
+        }
+    }
+
+    private fun getLocationFromNetwork(locationManager: LocationManager) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ONE_HUNDRED_LONG, ZERO_FLOAT, this)
+            location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            location?.let {
+                locationModel.apply {
+                    if (it.latitude != 0.0) latitude = it.latitude
+                    if (it.longitude != 0.0) longitude = it.longitude
+                }
+                coroutineScope.launch {
+                    threadLocation.storeLocation(locationModel)
+                }
+            }
+        }, 0)
+    }
+
+    private fun getLocationFromGps(locationManager: LocationManager) {
+        location = null
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ONE_HUNDRED_LONG, ZERO_FLOAT, this)
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            location?.let {
+                locationModel.apply {
+                    if (it.latitude != 0.0) latitude = it.latitude
+                    if (it.longitude != 0.0) longitude = it.longitude
+                }
+                coroutineScope.launch {
+                    threadLocation.storeLocation(locationModel)
+                }
+            }
+        }, ZERO_LONG)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+        // do status changed
+    }
+
+    private fun setupCheckLocation() {
+        coroutineScope.launch {
+            val location = threadLocation.getLocation()
+            if (location.isNotEmpty()) {
+                val locationModel = jsonUtil.fromJson<LocationModel>(location)
+                locationModel?.let {
+                    // give action at this
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopSelf()
+    }
+
+}
