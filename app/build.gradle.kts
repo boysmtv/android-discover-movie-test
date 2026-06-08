@@ -12,12 +12,11 @@ apply {
 
 android {
     namespace = "com.mandiri.movie"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.mandiri.movie"
         minSdk = 24
-        compileSdk = 33
 
         versionCode = 1
         versionName = "1.0"

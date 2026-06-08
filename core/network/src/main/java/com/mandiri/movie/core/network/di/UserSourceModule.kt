@@ -20,6 +20,6 @@ import dagger.hilt.components.SingletonComponent
 interface UserSourceModule {
 
     @Binds
-    fun UserDataSourceImpl.binds(): UserDataSource
+    fun binds(impl: UserDataSourceImpl): UserDataSource
 
 }

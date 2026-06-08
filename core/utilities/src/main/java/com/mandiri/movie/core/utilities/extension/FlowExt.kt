@@ -53,6 +53,7 @@ fun <T> Flow<T>.launchWhenStarted(
             try {
                 this@launchWhenStarted.collect()
             } catch (t: Throwable) {
+                if (t is CancellationException) throw t
                 Timber.tag("launchWhenStarted").e("Error-try-collect : ${t.message}")
             }
         }

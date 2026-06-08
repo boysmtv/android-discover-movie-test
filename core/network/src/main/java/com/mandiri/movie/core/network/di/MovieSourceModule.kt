@@ -12,6 +12,6 @@ import dagger.hilt.components.SingletonComponent
 interface MovieSourceModule {
 
     @Binds
-    fun MovieDataSourceImpl.binds(): MovieDataSource
+    fun binds(impl: MovieDataSourceImpl): MovieDataSource
 
 }

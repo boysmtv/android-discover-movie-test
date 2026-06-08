@@ -20,6 +20,6 @@ import dagger.hilt.components.SingletonComponent
 interface HeartbeatSourceModule {
 
     @Binds
-    fun HeartbeatDataSourceImpl.binds(): HeartbeatDataSource
+    fun binds(impl: HeartbeatDataSourceImpl): HeartbeatDataSource
 
 }
